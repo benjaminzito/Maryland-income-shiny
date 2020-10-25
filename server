@@ -1,0 +1,46 @@
+library(shiny)
+library(leaflet)
+library(tidyverse)
+
+server <- function(input, output, session){
+  
+  pal1 <- colorNumeric(domain = d$estimate, palette = "Blues")
+  
+  pal2 <- reactive({
+    colorNumeric(domain = d$estimate, palette = "Blues")
+  })
+  
+  filtered_data <- reactive({
+    d %>%
+      filter(Name == input$county)
+  }) 
+  
+  
+  output$map <- renderLeaflet({
+    
+    leaflet() %>%
+      setView(lat = 38.985033, lng = -76.536356, zoom = 8) %>%
+      addTiles() %>%
+      addPolygons(stroke = F, fillOpacity = .25,
+                  fillColor = ~pal1(estimate), data = d) %>%
+      addLegend(pal = pal1, values = d$estimate, data = d, position = "bottomright",
+                title = "Annual Median Income ($)")
+  }
+  )
+  observe({
+    react_pal <- pal2()
+    
+    
+    leafletProxy("map", data = filtered_data()) %>%
+      addPolygons(stroke = F, fillOpacity = 2,
+                  fillColor = ~react_pal(estimate), data = filtered_data(),
+                  layerId = "layer1")
+    
+  })
+  observeEvent(input$button,{
+    leafletProxy("map", data = filtered_data()) %>%
+      addPolygons(stroke = F, fillOpacity = 2,
+                  fillColor = ~react_pal(estimate), data = filtered_data(),
+                  layerId = "layer1")
+  })
+}
