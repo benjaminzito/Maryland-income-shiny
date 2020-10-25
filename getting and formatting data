@@ -1,0 +1,25 @@
+library(tidyverse)
+library(tidycensus)
+
+#getting api key
+census_api_key("0202ae3c979a781762a219b08660864b93127489")
+
+#getting md counties median income data
+md_counties <- get_acs(geography = "county",
+              variables = c(medincome = "B19013_001"),
+              state = "MD",
+              year = 2018,
+              geometry = TRUE)
+
+# Choices for drop-downs
+counties <- md_counties$NAME
+counties <-  gsub(pattern = "County, Maryland", replacement = "", counties, perl = T)
+counties <-  gsub(pattern = ", Maryland", replacement = "", counties, perl = T)
+counties <- gsub(" $", replacement = "", counties, perl = T)
+
+# fomratting the d dataframe
+
+d <- md_counties
+d$Name <-  gsub(pattern = "County, Maryland", replacement = "", counties, perl = T)
+d$Name <-  gsub(pattern = ", Maryland", replacement = "", counties, perl = T)
+d$Name <-  gsub(" $", replacement = "", counties, perl = T)
